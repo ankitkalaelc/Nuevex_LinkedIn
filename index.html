@@ -5,39 +5,59 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <title>NUEVEX Cognitive Evaluation v3</title>
   <style>
-    :root { --bg:#0b0f14; --card:#111826; --text:#e6eefc; --muted:#a7b1c2; --accent:#4ea8ff; --bad:#ff6b6b; }
+    :root { 
+      --bg:#0b0f14; --card:#111826; --text:#e6eefc; 
+      --muted:#a7b1c2; --accent:#4ea8ff; --bad:#ff6b6b; --good:#4eff8c;
+      --outline:#223249;
+    }
     *{box-sizing:border-box}
     html,body{height:100%}
-    body{margin:0;background:var(--bg);color:var(--text);font:16px/1.5 system-ui,-apple-system,Segoe UI,Roboto,Inter,Helvetica,Arial,sans-serif}
+    body{margin:0;background:var(--bg);color:var(--text);
+      font:16px/1.5 system-ui,-apple-system,Segoe UI,Roboto,Inter,Helvetica,Arial,sans-serif}
     .app{display:grid;min-height:100%;grid-template-rows:auto 1fr auto;}
-    header{position:sticky;top:0;z-index:10;background:linear-gradient(180deg, rgba(11,15,20,.95), rgba(11,15,20,.7));backdrop-filter:saturate(160%) blur(6px);border-bottom:1px solid #1d2a3b}
-    .bar{max-width:720px;margin:0 auto;padding:12px 16px;display:flex;align-items:center;gap:12px}
+    header{position:sticky;top:0;z-index:10;
+      background:linear-gradient(180deg, rgba(11,15,20,.95), rgba(11,15,20,.7));
+      backdrop-filter:saturate(160%) blur(6px);
+      border-bottom:1px solid #1d2a3b}
+    .bar{max-width:820px;margin:0 auto;padding:12px 16px;display:flex;align-items:center;gap:12px}
     .brand{display:flex;align-items:center;gap:10px}
     .brand .logo{width:28px;height:28px;border-radius:8px;background:linear-gradient(135deg,#4ea8ff,#7c5cff)}
     .brand h1{font-size:16px;margin:0;font-weight:700;letter-spacing:.2px}
-    .progress{margin-left:auto;font-weight:600;letter-spacing:.2px}
+    .progress-wrap{flex:1;margin-left:20px}
+    .progress-bar{width:100%;background:#1d2a3b;border-radius:8px;height:10px;overflow:hidden}
+    .progress-fill{height:100%;background:linear-gradient(90deg,#4ea8ff,#7c5cff);width:0;transition:width .3s ease}
+    .progress-text{font-size:12px;color:var(--muted);margin-top:2px;text-align:right}
     main{display:grid;place-items:start;}
-    .card{max-width:720px;width:100%;margin:18px auto;padding:18px;border:1px solid #1d2a3b;background:var(--card);border-radius:18px;box-shadow:0 8px 28px rgba(0,0,0,.25)}
+    .card{max-width:820px;width:100%;margin:18px auto;padding:22px;border:1px solid #1d2a3b;background:var(--card);
+      border-radius:20px;box-shadow:0 8px 28px rgba(0,0,0,.25);animation:fadeIn .35s ease}
     .title{font-size:18px;margin:0 0 8px}
     .desc{color:var(--muted);margin:0 0 16px}
     .actions{display:flex;flex-wrap:wrap;gap:12px;margin-top:16px}
-    button{appearance:none;border:0;border-radius:14px;padding:14px 18px;font-weight:700;cursor:pointer;background:var(--accent);color:#001227;box-shadow:0 4px 14px rgba(78,168,255,.35)}
+    button{appearance:none;border:0;border-radius:14px;padding:14px 18px;font-weight:700;cursor:pointer;
+      background:var(--accent);color:#001227;box-shadow:0 4px 14px rgba(78,168,255,.35);transition:all .2s ease}
+    button:hover:not([disabled]){transform:translateY(-1px);box-shadow:0 6px 18px rgba(78,168,255,.45)}
     button[disabled]{opacity:.5;cursor:not-allowed}
-    .btn-secondary{background:#1d2a3b;color:var(--text);box-shadow:none;border:1px solid #223249}
+    .btn-secondary{background:#1d2a3b;color:var(--text);box-shadow:none;border:1px solid var(--outline)}
     .options{display:grid;gap:10px}
-    .opt{display:flex;align-items:center;gap:10px;padding:12px;border:1px solid #223249;background:#0f1521;border-radius:12px}
+    .opt{display:flex;align-items:center;gap:10px;padding:12px;border:1px solid var(--outline);background:#0f1521;border-radius:12px;transition:.15s}
+    .opt:hover{border-color:var(--accent)}
     .opt input{width:22px;height:22px}
     label{cursor:pointer}
-    .textarea{width:100%;min-height:120px;padding:12px 14px;border-radius:12px;border:1px solid #223249;background:#0f1521;color:#e6eefc;font:inherit}
-    .input{width:100%;padding:12px 14px;border-radius:12px;border:1px solid #223249;background:#0f1521;color:#e6eefc;font:inherit}
-    .error{color:var(--bad);margin-top:8px}
-    .hint{color:var(--muted);font-size:14px}
+    .textarea{width:100%;min-height:120px;padding:12px 14px;border-radius:12px;border:1px solid var(--outline);background:#0f1521;color:var(--text);font:inherit;transition:box-shadow .2s}
+    .textarea:focus{outline:2px solid var(--accent)}
+    .input{width:100%;padding:12px 14px;border-radius:12px;border:1px solid var(--outline);background:#0f1521;color:var(--text);font:inherit}
+    .input:focus{outline:2px solid var(--accent)}
+    .char-counter{font-size:13px;margin-top:4px;color:var(--muted)}
+    .char-counter.valid{color:var(--good)}
+    .char-counter.error{color:var(--bad)}
+    .error{color:var(--bad);margin-top:8px;min-height:18px}
+    footer{max-width:820px;margin:0 auto 20px;padding:0 16px}
+    .kbd{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;background:#0e1a2a;border:1px solid #1f2e45;border-radius:6px;padding:2px 6px}
     .sr-only{position:absolute !important;left:-9999px !important;top:auto !important;width:1px !important;height:1px !important;overflow:hidden !important}
     .skip{position:absolute;left:-999px;top:auto;width:1px;height:1px;overflow:hidden}
     .skip:focus{left:16px;top:10px;width:auto;height:auto;background:#000;color:#fff;padding:8px 12px;border-radius:8px;z-index:9999}
-    footer{max-width:720px;margin:0 auto 20px;padding:0 16px}
-    .kbd{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;background:#0e1a2a;border:1px solid #1f2e45;border-radius:6px;padding:2px 6px}
     .dbg{margin-top:10px;color:#ffe380;font-size:12px}
+    @keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
   </style>
 </head>
 <body>
@@ -45,16 +65,19 @@
   <div class="app" role="application" aria-label="NUEVEX Cognitive Survey">
     <header>
       <div class="bar" role="banner">
-        <div class="brand" aria-label="Elicit NUEVEX">
+        <div class="brand" aria-label="NUEVEX">
           <div class="logo" aria-hidden="true"></div>
-          <h1>NUEVEX Cognitive Evaluation</h1>
+          <h1>NUEVEX Survey</h1>
         </div>
-        <div id="progress" class="progress" aria-live="polite">—</div>
+        <div class="progress-wrap">
+          <div class="progress-bar"><div id="progressFill" class="progress-fill"></div></div>
+          <div id="progressText" class="progress-text">0% complete</div>
+        </div>
       </div>
     </header>
 
     <main id="main">
-      <section id="screen" class="card" role="group" aria-describedby="progress"></section>
+      <section id="screen" class="card" role="group" aria-describedby="progressText"></section>
     </main>
 
     <footer>
@@ -67,7 +90,7 @@
   </div>
 
   <script>
-  // Show any unexpected JS error in the UI
+  // Show any JS error inside the card (so blank screens have a cause)
   window.addEventListener('error', function(ev){
     try{
       var scr = document.getElementById('screen');
@@ -86,7 +109,7 @@
       const REDIRECT_BASE = "https://api.opnion.io/processfinish";
       const NEUVEX_SHARED_KEY = "opnionnuevex"; // rotate periodically
 
-      // Primary = Make; Secondary = GAS
+      // Primary = Make; Secondary = GAS (keep order)
       const ENDPOINTS = [
         "https://hook.us1.make.com/bv9ku0rgbu4nc1labsafcbqs0cs74rky",
         "https://script.google.com/macros/s/AKfycbyAeO8NlIS-uSOy2uJIRuF3cYfZm1FaLOLHOXe_yu5Ry2_YP0yXpqCSoUFvXYZFIW2yWg/exec"
@@ -96,7 +119,8 @@
       const PID = (qs.get('pid') || qs.get('PID') || qs.get('transactionid') || qs.get('txid') || '').trim();
 
       const screenEl = document.getElementById('screen');
-      const progressEl = document.getElementById('progress');
+      const progressFill = document.getElementById('progressFill');
+      const progressText = document.getElementById('progressText');
       const nextBtn = document.getElementById('nextBtn');
       const prevBtn = document.getElementById('prevBtn');
       const dbg = document.getElementById('debug');
@@ -117,7 +141,7 @@
         started_at: Date.now(),
         resumed: false,
         step: 'consent', // 'q', 'done'
-        qIndex: 0,
+        qIndex: 0,       // index within questions (excludes consent descriptor)
         answers: {},
         qTimes: {},        // { qid: ms }
         typing: {},        // { qid: {keys,durationMs,cps} }
@@ -170,7 +194,7 @@
         // 14 Red Herring (🐶) security gate
         { id:'q14_gate_dog', type:'single', title:'Quick check: Which of the following animals barks? 🐶', options:['🐱 Cat','🐶 Dog','🐦 Bird'], correct:'🐶 Dog', securityGate:true },
 
-        // 15 LinkedIn Tenure (Complete if any except “I do not use LinkedIn”; DQ if that)
+        // 15 LinkedIn Tenure final routing (complete unless "I do not use LinkedIn")
         { id:'q15_li_tenure', type:'single', title:'How long have you been using LinkedIn?', options:['I recently signed up','About a year','More than 2 years','I do not use LinkedIn'], finalRouting:true }
       ];
 
@@ -185,20 +209,27 @@
       }
 
       function renderConsent(){
-        progressEl.textContent = 'Consent';
+        updateProgress(0);
         nextBtn.textContent = 'I Agree and Continue';
         prevBtn.hidden = true;
 
         screenEl.innerHTML =
-          '<h2 class="title">Consent to Participate</h2>' +
-          '<p class="desc">Please confirm you consent to participate in this survey. Your responses will be used for research and may be anonymized. You can exit anytime.</p>' +
-          '<div class="opt"><input id="consentChk" type="checkbox" aria-describedby="consentHint" />' +
-          '<label for="consentChk">I agree to participate</label></div>' +
-          '<p id="consentHint" class="hint">You must agree to proceed.</p>' +
-          '<div class="actions" style="margin-top:10px">' +
-          '  <button type="button" id="disagreeBtn" class="btn-secondary" aria-label="Decline and exit">I Disagree and Exit</button>' +
-          '</div>' +
-          '<p class="hint">Keyboard: press <span class="kbd">Enter</span> to continue.</p>';
+  '<h2 class="title">Consent to Participate</h2>' +
+  '<p class="desc">Thank you for taking part in this research study. Please read the following carefully before continuing:</p>' +
+  '<ul class="desc">' +
+  '  <li>This survey is for <strong>research purposes only</strong>.</li>' +
+  '  <li>Your answers are <strong>confidential and anonymous</strong>; no personal details will be linked to your responses.</li>' +
+  '  <li>Please provide <strong>honest and thoughtful answers</strong>.</li>' +
+  '  <li>To ensure data quality, this survey may include <strong>attention-check questions</strong>. If not answered correctly, your participation may be ended without credit.</li>' +
+  '  <li>You may stop participating at any time.</li>' +
+  '</ul>' +
+  '<div class="opt"><input id="consentChk" type="checkbox" aria-describedby="consentHint" />' +
+  '<label for="consentChk">I confirm that I am 18 years of age or older and consent to participate</label></div>' +
+  '<p id="consentHint" class="hint">You must agree to proceed.</p>' +
+  '<div class="actions" style="margin-top:10px">' +
+  '  <button type="button" id="disagreeBtn" class="btn-secondary" aria-label="Decline and exit">I Disagree and Exit</button>' +
+  '</div>' +
+  '<p class="hint">Keyboard: press <span class="kbd">Enter</span> to continue.</p>';
 
         const chk = document.getElementById('consentChk');
         const dis = document.getElementById('disagreeBtn');
@@ -221,8 +252,8 @@
         // Q[0] is consent descriptor; questions start at index 1
         const q = Q[i+1];
         if(!q){ return completeFlow(); }
-        updateProgress();
-        prevBtn.hidden = true;
+        updateProgress(i+1); // questions progress index
+        prevBtn.hidden = true; // Back disabled by design
         nextBtn.textContent = (i+1) === (Q.length-1) ? 'Submit' : 'Next';
 
         let body = '<h2 class="title">'+escapeHTML(q.title)+'</h2>';
@@ -244,7 +275,8 @@
           const val = S.answers[q.id] || '';
           body += '<label for="'+q.id+'" class="sr-only">'+escapeHTML(q.title)+'</label>' +
                   '<textarea id="'+q.id+'" class="textarea" minlength="'+(q.min||0)+'" placeholder="'+escapeHTML(q.placeholder||'Type your answer…')+'" aria-describedby="'+q.id+'_hint">'+escapeHTML(val)+'</textarea>' +
-                  (q.min ? ('<p id="'+q.id+'_hint" class="hint">Minimum '+q.min+' characters.</p>') : '');
+                  (q.min ? ('<p id="'+q.id+'_hint" class="hint">Minimum '+q.min+' characters.</p>') : '') +
+                  '<div id="'+q.id+'_counter" class="char-counter"></div>';
         }
 
         if(q.type==='number'){
@@ -269,6 +301,7 @@
 
         if(q.type==='open'){
           const ta = document.getElementById(q.id);
+          const counter = document.getElementById(q.id+'_counter');
           if(ta){
             ta.addEventListener('keydown', () => {
               typing.keys++;
@@ -276,6 +309,19 @@
               if(!typing.firstAt) typing.firstAt = now;
               typing.lastAt = now;
             });
+            ta.addEventListener('input', () => {
+              const len = ta.value.trim().length;
+              if(counter){
+                counter.textContent = (q.min ? (len+' / '+q.min+' characters') : (len+' characters'));
+                counter.className = 'char-counter ' + ((q.min && len>=q.min) ? 'valid' : (q.min ? 'error' : ''));
+              }
+            });
+            // initialize counter
+            const initLen = (S.answers[q.id] || '').trim().length;
+            if(counter){
+              counter.textContent = (q.min ? (initLen+' / '+q.min+' characters') : (initLen+' characters'));
+              counter.className = 'char-counter ' + ((q.min && initLen>=q.min) ? 'valid' : (q.min ? 'error' : ''));
+            }
             ta.focus();
           }
         } else {
@@ -370,15 +416,17 @@
       }
 
       function renderDone(){
-        progressEl.textContent = 'Finished';
+        updateProgress(Q.length-1);
         nextBtn.hidden = true; prevBtn.hidden = true;
-        screenEl.innerHTML = '<h2 class="title">You can close this tab.</h2>';
+        screenEl.innerHTML = '<h2 class="title">✅ Thanks! Redirecting…</h2><p class="desc">You can close this tab if not redirected automatically.</p>';
       }
 
-      function updateProgress(){
+      function updateProgress(questionIndex){
         const totalQs = Q.length - 1; // exclude consent descriptor
-        const curr = Math.min(S.qIndex + 1, totalQs);
-        progressEl.textContent = 'Q' + curr + ' of ' + totalQs;
+        const curr = Math.min(questionIndex, totalQs);
+        const pct = Math.max(0, Math.min(100, Math.round((curr/totalQs)*100)));
+        progressFill.style.width = pct + '%';
+        progressText.textContent = pct + '% complete';
       }
 
       function showError(msg){
@@ -404,7 +452,7 @@
         const url = REDIRECT_BASE + '?status=' + status + '&transactionid=' + encodeURIComponent(PID);
 
         // allow network to flush
-        setTimeout(()=>{ location.href = url; }, 600);
+        setTimeout(()=>{ location.href = url; }, 700);
         renderDone();
       }
 
