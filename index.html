@@ -4,7 +4,6 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <title>NUEVEX Cognitive Evaluation v3</title>
-
   <style>
     :root { 
       --bg:#0b0f14; --card:#111826; --text:#e6eefc; 
@@ -15,7 +14,6 @@
     html,body{height:100%}
     body{margin:0;background:var(--bg);color:var(--text);
       font:16px/1.5 system-ui,-apple-system,Segoe UI,Roboto,Inter,Helvetica,Arial,sans-serif}
-
     .app{display:grid;min-height:100%;grid-template-rows:auto 1fr auto;}
     header{position:sticky;top:0;z-index:10;
       background:linear-gradient(180deg, rgba(11,15,20,.95), rgba(11,15,20,.7));
@@ -29,160 +27,481 @@
     .progress-bar{width:100%;background:#1d2a3b;border-radius:8px;height:10px;overflow:hidden}
     .progress-fill{height:100%;background:linear-gradient(90deg,#4ea8ff,#7c5cff);width:0;transition:width .3s ease}
     .progress-text{font-size:12px;color:var(--muted);margin-top:2px;text-align:right}
-
     main{display:grid;place-items:start;}
     .card{max-width:820px;width:100%;margin:18px auto;padding:22px;border:1px solid #1d2a3b;background:var(--card);
       border-radius:20px;box-shadow:0 8px 28px rgba(0,0,0,.25);animation:fadeIn .35s ease}
-
     .title{font-size:18px;margin:0 0 8px}
     .desc{color:var(--muted);margin:0 0 16px}
     .actions{display:flex;flex-wrap:wrap;gap:12px;margin-top:16px}
     button{appearance:none;border:0;border-radius:14px;padding:14px 18px;font-weight:700;cursor:pointer;
       background:var(--accent);color:#001227;box-shadow:0 4px 14px rgba(78,168,255,.35);transition:all .2s ease}
-    button:hover:not([disabled]){transform:translateY(-1px)}
+    button:hover:not([disabled]){transform:translateY(-1px);box-shadow:0 6px 18px rgba(78,168,255,.45)}
     button[disabled]{opacity:.5;cursor:not-allowed}
     .btn-secondary{background:#1d2a3b;color:var(--text);box-shadow:none;border:1px solid var(--outline)}
     .options{display:grid;gap:10px}
-    .opt{display:flex;align-items:center;gap:10px;padding:12px;border:1px solid var(--outline);background:#0f1521;border-radius:12px}
+    .opt{display:flex;align-items:center;gap:10px;padding:12px;border:1px solid var(--outline);background:#0f1521;border-radius:12px;transition:.15s}
+    .opt:hover{border-color:var(--accent)}
     .opt input{width:22px;height:22px}
     label{cursor:pointer}
-
-    .textarea{width:100%;min-height:120px;padding:12px 14px;border-radius:12px;border:1px solid var(--outline);background:#0f1521;color:var(--text)}
+    .textarea{width:100%;min-height:120px;padding:12px 14px;border-radius:12px;border:1px solid var(--outline);background:#0f1521;color:var(--text);font:inherit;transition:box-shadow .2s}
     .textarea:focus{outline:2px solid var(--accent)}
-    .input{width:100%;padding:12px 14px;border-radius:12px;border:1px solid var(--outline);background:#0f1521;color:var(--text)}
+    .input{width:100%;padding:12px 14px;border-radius:12px;border:1px solid var(--outline);background:#0f1521;color:var(--text);font:inherit}
     .input:focus{outline:2px solid var(--accent)}
-
     .char-counter{font-size:13px;margin-top:4px;color:var(--muted)}
     .char-counter.valid{color:var(--good)}
     .char-counter.error{color:var(--bad)}
     .error{color:var(--bad);margin-top:8px;min-height:18px}
     footer{max-width:820px;margin:0 auto 20px;padding:0 16px}
+    .kbd{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;background:#0e1a2a;border:1px solid #1f2e45;border-radius:6px;padding:2px 6px}
+    .sr-only{position:absolute !important;left:-9999px !important;top:auto !important;width:1px !important;height:1px !important;overflow:hidden !important}
+    .skip{position:absolute;left:-999px;top:auto;width:1px;height:1px;overflow:hidden}
+    .skip:focus{left:16px;top:10px;width:auto;height:auto;background:#000;color:#fff;padding:8px 12px;border-radius:8px;z-index:9999}
     .dbg{margin-top:10px;color:#ffe380;font-size:12px}
     @keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
   </style>
 </head>
-
 <body>
-<div class="app">
-<header>
-  <div class="bar">
-    <div class="brand">
-      <div class="logo"></div>
-      <h1>Elicit Research: NUEVEX Cognition</h1>
-    </div>
-    <div class="progress-wrap">
-      <div class="progress-bar"><div id="progressFill" class="progress-fill"></div></div>
-      <div id="progressText" class="progress-text">0% complete</div>
-    </div>
+  <a href="#main" class="skip">Skip to content</a>
+  <div class="app" role="application" aria-label="NUEVEX Cognitive Survey">
+    <header>
+      <div class="bar" role="banner">
+        <div class="brand" aria-label="NUEVEX">
+          <div class="logo" aria-hidden="true"></div>
+          <h1>NUEVEX Survey</h1>
+        </div>
+        <div class="progress-wrap">
+          <div class="progress-bar"><div id="progressFill" class="progress-fill"></div></div>
+          <div id="progressText" class="progress-text">0% complete</div>
+        </div>
+      </div>
+    </header>
+
+    <main id="main">
+      <section id="screen" class="card" role="group" aria-describedby="progressText"></section>
+    </main>
+
+    <footer>
+      <div class="actions">
+        <button id="prevBtn" class="btn-secondary" aria-label="Previous question" hidden>Back</button>
+        <button id="nextBtn" aria-label="Next question">Next</button>
+      </div>
+      <div id="debug" class="dbg"></div>
+    </footer>
   </div>
-</header>
 
-<main>
-  <section id="screen" class="card"></section>
-</main>
-
-<footer>
-  <div class="actions">
-    <button id="nextBtn">Next</button>
-  </div>
-  <div id="debug" class="dbg"></div>
-</footer>
-</div>
-
-<script>
-window.addEventListener('DOMContentLoaded', function(){
-
-const REDIRECT_BASE = "https://api.opnion.io/processfinish";
-const NEUVEX_SHARED_KEY = "opnionnuevex";
-
-const ENDPOINTS = [
-  "https://hook.us1.make.com/bv9ku0rgbu4nc1labsafcbqs0cs74rky",
-  "https://script.google.com/macros/s/AKfycbyAeO8NlIS-uSOy2uJIRuF3cYfZm1FaLOLHOXe_yu5Ry2_YP0yXpqCSoUFvXYZFIW2yWg/exec"
-];
-
-const qs = new URLSearchParams(location.search);
-const PID = (qs.get('pid') || '').trim();
-if(!PID){
-  document.getElementById('screen').innerHTML = "<h2>Missing PID</h2>";
-  return;
-}
-
-const STORAGE_KEY = 'neuvex_v3:' + PID;
-let S = JSON.parse(localStorage.getItem(STORAGE_KEY) || 'null') || {
-  version:'3.0.0',
-  pid:PID,
-  started_at:Date.now(),
-  step:0,
-  answers:{},
-  qTimes:{},
-  typing:{},
-  outcome:null
-};
-
-const Q = [
-  {id:'q4_zip', type:'postal', title:'What is your ZIP / Postal Code?'}
-];
-
-const screen = document.getElementById('screen');
-const nextBtn = document.getElementById('nextBtn');
-
-render();
-
-function render(){
-  const q = Q[S.step];
-  screen.innerHTML =
-    '<h2 class="title">'+q.title+'</h2>' +
-    '<input id="'+q.id+'" class="input" autocomplete="postal-code" inputmode="text" maxlength="10" placeholder="e.g., SW1A 1AA / M5V 3L9 / 110001" />' +
-    '<div id="err" class="error"></div>';
-}
-
-nextBtn.onclick = function(){
-  const q = Q[S.step];
-  const val = document.getElementById(q.id).value.trim().toUpperCase().replace(/\s+/g,' ');
-  
-  if(!/^[A-Z0-9 -]+$/.test(val)){
-    return showError("Please enter a valid ZIP / Postal Code.");
-  }
-
-  const compact = val.replace(/[\s-]/g,'');
-  if(compact.length < 3 || compact.length > 10){
-    return showError("Please enter a valid ZIP / Postal Code.");
-  }
-
-  S.answers[q.id] = val;
-  S.qTimes[q.id] = Date.now() - S.started_at;
-
-  exitWithOutcome('complete','zip_test');
-};
-
-function showError(msg){
-  document.getElementById('err').textContent = msg;
-}
-
-function exitWithOutcome(type, reason){
-  S.outcome = type;
-  const endAt = Date.now();
-
-  const payload = {
-    x_key: NEUVEX_SHARED_KEY,
-    pid:S.pid,
-    outcome:type,
-    reason:reason,
-    total_time_sec:Math.round((endAt - S.started_at)/1000),
-    answers:S.answers,
-    q_times_ms:S.qTimes
-  };
-
-  ENDPOINTS.forEach(url=>{
-    navigator.sendBeacon(url,new Blob([JSON.stringify(payload)],{type:'application/json'}));
+  <script>
+  // Show any JS error inside the card (so blank screens have a cause)
+  window.addEventListener('error', function(ev){
+    try{
+      var scr = document.getElementById('screen');
+      if(scr){
+        scr.innerHTML = '<h2 class="title">Script error</h2><p class="desc">'+escapeHTML(ev.message || 'Unknown error')+'</p>';
+      }
+    }catch(e){}
   });
 
-  setTimeout(()=>{
-    location.href = REDIRECT_BASE + "?status=1&transactionid="+encodeURIComponent(PID);
-  },600);
-}
+  window.addEventListener('DOMContentLoaded', function(){
+    (function(){
+      const qs = new URLSearchParams(location.search);
+      const DEBUG = qs.get('debug') === '1';
 
-});
-</script>
+      // ===== CONFIG =====
+      const REDIRECT_BASE = "https://api.opnion.io/processfinish";
+      const NEUVEX_SHARED_KEY = "opnionnuevex"; // rotate periodically
+
+      // Primary = Make; Secondary = GAS (keep order)
+      const ENDPOINTS = [
+        "https://hook.us1.make.com/bv9ku0rgbu4nc1labsafcbqs0cs74rky",
+        "https://script.google.com/macros/s/AKfycbyAeO8NlIS-uSOy2uJIRuF3cYfZm1FaLOLHOXe_yu5Ry2_YP0yXpqCSoUFvXYZFIW2yWg/exec"
+      ];
+
+      // ===== PID REQUIRED =====
+      const PID = (qs.get('pid') || qs.get('PID') || qs.get('transactionid') || qs.get('txid') || '').trim();
+
+      const screenEl = document.getElementById('screen');
+      const progressFill = document.getElementById('progressFill');
+      const progressText = document.getElementById('progressText');
+      const nextBtn = document.getElementById('nextBtn');
+      const prevBtn = document.getElementById('prevBtn');
+      const dbg = document.getElementById('debug');
+
+      if (!PID) {
+        screenEl.innerHTML = '<h2 class="title">Missing Participant ID</h2><p class="desc">This survey link must include a PID. Example:<br><span class="kbd">?pid=ELR12345</span></p>';
+        nextBtn.hidden = true; prevBtn.hidden = true;
+        if(DEBUG){ dbg.textContent = 'DEBUG: PID missing. URL=' + location.href; }
+        return;
+      }
+      if(DEBUG){ dbg.textContent = 'DEBUG: PID=' + PID; }
+
+      // ===== STATE =====
+      const STORAGE_KEY = 'neuvex_v3:' + PID;
+      const defaultState = {
+        version: '3.0.0',
+        pid: PID,
+        started_at: Date.now(),
+        resumed: false,
+        step: 'consent', // 'q', 'done'
+        qIndex: 0,       // index within questions (excludes consent descriptor)
+        answers: {},
+        qTimes: {},        // { qid: ms }
+        typing: {},        // { qid: {keys,durationMs,cps} }
+        last_rendered_at: Date.now(),
+        outcome: null,     // 'complete'|'dq'|'quota'|'sec'
+        outcome_reason: null
+      };
+      let S = loadState() || defaultState;
+
+      // ===== QUESTIONS (IDs preserved for Make/Sheets mapping) =====
+      const Q = [
+        { id:'consent', type:'consent', title:'Consent to Participate' },
+
+        // 2 Age (open numeric 18–99 with direct DQ if invalid)
+        { id:'q2_age', type:'number', title:'What is your age? (Please enter a whole number between 18 and 99)', min:18, max:99, dqOnInvalid:true },
+
+        // 3 Gender
+        { id:'q3_gender', type:'single', title:'What is your gender?', options:['Male','Female','Non-binary / Other','Prefer not to say'] },
+
+        // 4 ZIP (strict 5 digits)
+        { id:'q4_zip', type:'zip5', title:'What is your 5-digit ZIP or postal code?' },
+
+        // 5 Laptop/Computer (UPDATED WORDING/OPTIONS)
+        { id:'q5_laptop', type:'single', title:'Which type of computer or laptop do you primarily use?', options:['Windows (PC)','Apple (Mac)','Linux','Other','I do not use a laptop/computer'] },
+
+        // 6 Ideal Weekend (open, 50+ chars) + typing cadence capture
+        { id:'q6_weekend', type:'open', title:'In one or two sentences, please describe your ideal weekend.', min:50, placeholder:'Type your response here (min 50 characters)', captureTyping:true },
+
+        // 7 Online Shopping Frequency (UPDATED OPTIONS)
+        { id:'q7_shop', type:'single', title:'How often do you shop online?', options:['Daily','Weekly','Monthly','Rarely / Never'] },
+
+        // 8 Red Herring (🍌) security gate
+        { id:'q8_gate_banana', type:'single', title:'Quick check: Which of the following is a fruit? 🍌', options:['🚗 Car','🍌 Banana','🏠 House'], correct:'🍌 Banana', securityGate:true },
+
+        // 9 Movie (open, 50+ chars) + typing
+        { id:'q9_movie', type:'open', title:'What is your favorite Hollywood movie, and why did it have an impact on you?', min:50, placeholder:'Write at least 50 characters...', captureTyping:true },
+
+        // 10 Employment (DQ if Student/Unemployed)
+        { id:'q10_employment', type:'single', title:'What is your current employment status?', options:['Employed full-time','Employed part-time','Self-employed','Student','Unemployed'], dqOn:['Student','Unemployed'] },
+
+        // 11 LinkedIn frequency (DQ if I do not use LinkedIn)
+        { id:'q11_li_freq', type:'single', title:'How often do you use LinkedIn?', options:['I do not use LinkedIn','Less than once a month','1–2 times a month','Weekly','Daily (1–2 hours or more)'], dqOn:['I do not use LinkedIn'] },
+
+        // 12 Following preferences (open, 100+ chars) + typing
+        { id:'q12_follow', type:'open', title:'What types of groups, companies, or people do you prefer to follow on LinkedIn?', min:100, placeholder:'Write at least 100 characters...', captureTyping:true },
+
+        // 13 Most useful feature (open, 150+ chars) + typing
+        { id:'q13_feature', type:'open', title:'In your opinion, which LinkedIn feature is most useful when searching for a job, and why?', min:150, placeholder:'Write at least 150 characters...', captureTyping:true },
+
+        // 14 Red Herring (🐶) security gate
+        { id:'q14_gate_dog', type:'single', title:'Quick check: Which of the following animals barks? 🐶', options:['🐱 Cat','🐶 Dog','🐦 Bird'], correct:'🐶 Dog', securityGate:true },
+
+        // 15 LinkedIn Tenure final routing (complete unless "I do not use LinkedIn")
+        { id:'q15_li_tenure', type:'single', title:'How long have you been using LinkedIn?', options:['I recently signed up','About a year','More than 2 years','I do not use LinkedIn'], finalRouting:true }
+      ];
+
+      // ===== RENDERERS =====
+      function render(){
+        saveState();
+        if(S.step === 'consent'){ renderConsent(); return; }
+        if(S.step === 'q'){ renderQuestion(); return; }
+        if(S.step === 'done'){ renderDone(); return; }
+        // initial load
+        renderConsent();
+      }
+
+      function renderConsent(){
+        updateProgress(0);
+        nextBtn.textContent = 'I Agree and Continue';
+        prevBtn.hidden = true;
+
+        screenEl.innerHTML =
+          '<h2 class="title">Consent to Participate</h2>' +
+          '<p class="desc">Please confirm you consent to participate in this survey. Your responses will be used for research and may be anonymized. You can exit anytime.</p>' +
+          '<div class="opt"><input id="consentChk" type="checkbox" aria-describedby="consentHint" />' +
+          '<label for="consentChk">I agree to participate</label></div>' +
+          '<p id="consentHint" class="hint">You must agree to proceed.</p>' +
+          '<div class="actions" style="margin-top:10px">' +
+          '  <button type="button" id="disagreeBtn" class="btn-secondary" aria-label="Decline and exit">I Disagree and Exit</button>' +
+          '</div>' +
+          '<p class="hint">Keyboard: press <span class="kbd">Enter</span> to continue.</p>';
+
+        const chk = document.getElementById('consentChk');
+        const dis = document.getElementById('disagreeBtn');
+        if(chk) chk.focus();
+
+        nextBtn.onclick = () => {
+          if(!chk || !chk.checked){ showError('Please provide consent to continue.'); return; }
+          S.step = 'q'; S.qIndex = 0; S.last_rendered_at = Date.now(); renderQuestion();
+        };
+        if(dis){ dis.onclick = () => exitWithOutcome('dq','consent_declined'); }
+
+        document.onkeydown = (e)=>{
+          const tag = (e.target && e.target.tagName) ? e.target.tagName.toLowerCase() : "";
+          if(e.key==='Enter' && tag !== 'textarea' && tag !== 'input'){ nextBtn.click(); }
+        };
+      }
+
+      function renderQuestion(){
+        const i = S.qIndex;
+        // Q[0] is consent descriptor; questions start at index 1
+        const q = Q[i+1];
+        if(!q){ return completeFlow(); }
+        updateProgress(i+1); // questions progress index
+        prevBtn.hidden = true; // Back disabled by design
+        nextBtn.textContent = (i+1) === (Q.length-1) ? 'Submit' : 'Next';
+
+        let body = '<h2 class="title">'+escapeHTML(q.title)+'</h2>';
+        let err  = '<div id="err" class="error" role="alert" aria-live="polite"></div>';
+
+        if(q.type==='single'){
+          body += '<div class="options" role="radiogroup" aria-label="options">';
+          for(let idx=0; idx<q.options.length; idx++){
+            const opt = q.options[idx];
+            const id  = q.id + '_' + idx;
+            const checked = (S.answers[q.id]===opt) ? 'checked' : '';
+            body += '<div class="opt"><input '+checked+' type="radio" name="'+q.id+'" id="'+id+'" value="'+escapeHTML(opt)+'" aria-labelledby="'+id+'_lbl" />' +
+                    '<label id="'+id+'_lbl" for="'+id+'">'+escapeHTML(opt)+'</label></div>';
+          }
+          body += '</div>';
+        }
+
+        if(q.type==='open'){
+          const val = S.answers[q.id] || '';
+          body += '<label for="'+q.id+'" class="sr-only">'+escapeHTML(q.title)+'</label>' +
+                  '<textarea id="'+q.id+'" class="textarea" minlength="'+(q.min||0)+'" placeholder="'+escapeHTML(q.placeholder||'Type your answer…')+'" aria-describedby="'+q.id+'_hint">'+escapeHTML(val)+'</textarea>' +
+                  (q.min ? ('<p id="'+q.id+'_hint" class="hint">Minimum '+q.min+' characters.</p>') : '') +
+                  '<div id="'+q.id+'_counter" class="char-counter"></div>';
+        }
+
+        if(q.type==='number'){
+          const val = S.answers[q.id] || '';
+          body += '<label for="'+q.id+'" class="sr-only">'+escapeHTML(q.title)+'</label>' +
+                  '<input id="'+q.id+'" class="input" inputmode="numeric" pattern="[0-9]*" placeholder="Enter a whole number (18–99)" value="'+escapeHTML(String(val))+'" />';
+        }
+
+        if(q.type==='zip5'){
+          const val = S.answers[q.id] || '';
+          body += '<label for="'+q.id+'" class="sr-only">'+escapeHTML(q.title)+'</label>' +
+                  '<input id="'+q.id+'" class="input" inputmode="numeric" pattern="\\d{5}" maxlength="5" placeholder="12345" value="'+escapeHTML(String(val))+'" />' +
+                  '<p class="hint">Enter exactly 5 digits.</p>';
+        }
+
+        screenEl.innerHTML = body + err;
+
+        // Timing + typing capture
+        const qStart = Date.now();
+        const typing = { keys:0, firstAt:null, lastAt:null };
+        S.last_rendered_at = qStart;
+
+        if(q.type==='open'){
+          const ta = document.getElementById(q.id);
+          const counter = document.getElementById(q.id+'_counter');
+          if(ta){
+            ta.addEventListener('keydown', () => {
+              typing.keys++;
+              const now = Date.now();
+              if(!typing.firstAt) typing.firstAt = now;
+              typing.lastAt = now;
+            });
+            ta.addEventListener('input', () => {
+              const len = ta.value.trim().length;
+              if(counter){
+                counter.textContent = (q.min ? (len+' / '+q.min+' characters') : (len+' characters'));
+                counter.className = 'char-counter ' + ((q.min && len>=q.min) ? 'valid' : (q.min ? 'error' : ''));
+              }
+            });
+            // initialize counter
+            const initLen = (S.answers[q.id] || '').trim().length;
+            if(counter){
+              counter.textContent = (q.min ? (initLen+' / '+q.min+' characters') : (initLen+' characters'));
+              counter.className = 'char-counter ' + ((q.min && initLen>=q.min) ? 'valid' : (q.min ? 'error' : ''));
+            }
+            ta.focus();
+          }
+        } else {
+          const focusEl = screenEl.querySelector('input, textarea, input[type="radio"]');
+          if(focusEl) focusEl.focus();
+        }
+
+        nextBtn.onclick = () => {
+          const elapsed = Date.now() - qStart;
+
+          if(q.type==='single'){
+            const chosen = screenEl.querySelector('input[name="'+q.id+'"]:checked');
+            if(!chosen){ return showError('Please select one option to continue.'); }
+            const value = chosen.value;
+            S.answers[q.id] = value;
+            S.qTimes[q.id] = elapsed;
+
+            // DQ lists
+            if(q.dqOn && q.dqOn.includes(value)){
+              return exitWithOutcome('dq', q.id+'_disqualifier');
+            }
+            // Security gates
+            if(q.securityGate && q.correct && value !== q.correct){
+              return exitWithOutcome('sec', q.id+'_failed_gate');
+            }
+            // Final routing (q15)
+            if(q.finalRouting){
+              if(value === 'I do not use LinkedIn'){
+                return exitWithOutcome('dq','q15_li_tenure_disqualifier');
+              } else {
+                return exitWithOutcome('complete','q15_li_tenure_complete');
+              }
+            }
+          }
+
+          if(q.type==='open'){
+            const ta = document.getElementById(q.id);
+            const val = (ta && ta.value ? ta.value : '').trim();
+            if((q.min||0) && val.length < q.min){
+              if(ta){ ta.setAttribute('aria-invalid','true'); }
+              return showError('Please enter at least '+(q.min||0)+' characters.');
+            }
+            if(typeof q.validate === 'function' && !q.validate(val)){
+              return showError('Please enter a valid response to continue.');
+            }
+            S.answers[q.id] = val;
+            S.qTimes[q.id] = elapsed;
+
+            if(q.captureTyping){
+              if(typing.firstAt && typing.lastAt){
+                const duration = typing.lastAt - typing.firstAt;
+                const cps = duration>0 ? +(typing.keys / (duration/1000)).toFixed(2) : 0;
+                S.typing[q.id] = { keys: typing.keys, durationMs: duration, cps: cps };
+              } else {
+                S.typing[q.id] = { keys: 0, durationMs: 0, cps: 0 };
+              }
+            }
+          }
+
+          if(q.type==='number'){
+            const input = document.getElementById(q.id);
+            const val = input ? String(input.value).trim() : '';
+            const num = Number(val);
+            const valid = val !== '' && Number.isInteger(num) && num >= (q.min||0) && num <= (q.max||999);
+            if(!valid){
+              if(q.dqOnInvalid){ return exitWithOutcome('dq','q2_age_invalid'); }
+              return showError('Please enter a valid age to continue.');
+            }
+            S.answers[q.id] = num;
+            S.qTimes[q.id] = elapsed;
+          }
+
+          if(q.type==='zip5'){
+            const input = document.getElementById(q.id);
+            const val = input ? String(input.value).trim() : '';
+            if(!/^\d{5}$/.test(val)){
+              return showError('Please enter exactly 5 digits.');
+            }
+            S.answers[q.id] = val;
+            S.qTimes[q.id] = elapsed;
+          }
+
+          S.qIndex = i+1;
+          saveState();
+          renderQuestion();
+        };
+
+        document.onkeydown = (e)=>{ 
+          const tag = (e.target && e.target.tagName) ? e.target.tagName.toLowerCase() : "";
+          if(e.key==='Enter' && tag !== 'textarea' && tag !== 'input'){ nextBtn.click(); } 
+        };
+      }
+
+      function renderDone(){
+        updateProgress(Q.length-1);
+        nextBtn.hidden = true; prevBtn.hidden = true;
+        screenEl.innerHTML = '<h2 class="title">✅ Thanks! Redirecting…</h2><p class="desc">You can close this tab if not redirected automatically.</p>';
+      }
+
+      function updateProgress(questionIndex){
+        const totalQs = Q.length - 1; // exclude consent descriptor
+        const curr = Math.min(questionIndex, totalQs);
+        const pct = Math.max(0, Math.min(100, Math.round((curr/totalQs)*100)));
+        progressFill.style.width = pct + '%';
+        progressText.textContent = pct + '% complete';
+      }
+
+      function showError(msg){
+        const el = document.getElementById('err'); if(el){ el.textContent = msg; }
+      }
+
+      // ===== OUTCOMES =====
+      function completeFlow(){ exitWithOutcome('complete','natural_complete'); }
+
+      function exitWithOutcome(type, reason){
+        S.outcome = type; S.outcome_reason = reason; S.step = 'done';
+        const endAt = Date.now();
+        const payload = buildPayload(endAt);
+
+        // Fan-out (Make first, GAS second)
+        ENDPOINTS.forEach(url => sendPayload(url, payload));
+
+        // Redirects
+        const status = (type==='complete') ? 1
+                     : (type==='dq')       ? 2
+                     : (type==='quota')    ? 3
+                     :                       4; // 'sec' or others
+        const url = REDIRECT_BASE + '?status=' + status + '&transactionid=' + encodeURIComponent(PID);
+
+        // allow network to flush
+        setTimeout(()=>{ location.href = url; }, 700);
+        renderDone();
+      }
+
+      // ===== PAYLOAD =====
+      function buildPayload(endAt){
+        const total = Math.round((endAt - S.started_at)/1000);
+        const device = {
+          user_agent: navigator.userAgent,
+          platform: navigator.platform,
+          language: navigator.language,
+          screen_w: window.screen.width,
+          screen_h: window.screen.height,
+          tz_offset_min: new Date().getTimezoneOffset()
+        };
+        return {
+          x_key: NEUVEX_SHARED_KEY,
+          version: S.version,
+          pid: S.pid,
+          outcome: S.outcome,
+          reason: S.outcome_reason,
+          started_at: new Date(S.started_at).toISOString(),
+          ended_at: new Date(endAt).toISOString(),
+          total_time_sec: total,
+          answers: S.answers,
+          q_times_ms: S.qTimes,
+          typing_cadence: S.typing,
+          last_index: S.qIndex,
+          resumed: S.resumed,
+          device
+        };
+      }
+
+      function sendPayload(url, payload){
+        try{
+          const blob = new Blob([JSON.stringify(payload)],{type:'application/json'});
+          if(navigator.sendBeacon){ navigator.sendBeacon(url, blob); }
+          fetch(url, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload), keepalive:true }).catch(()=>{});
+          fetch(url, { method:'POST', mode:'no-cors', keepalive:true, body: JSON.stringify(payload) }).catch(()=>{});
+        }catch(e){}
+      }
+
+      // ===== PERSISTENCE =====
+      function saveState(){ try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(S)); }catch(e){} }
+      function loadState(){ try{ const raw = localStorage.getItem(STORAGE_KEY); if(!raw) return null; const obj = JSON.parse(raw); obj.resumed = true; return obj; }catch(e){ return null; } }
+
+      // UTIL
+      function escapeHTML(s){
+        var map = {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'};
+        return (s||'').replace(/[&<>\"']/g, function(c){ return map[c]; });
+      }
+
+      // INIT
+      render();
+
+    })();
+  });
+  </script>
 </body>
 </html>
