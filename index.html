@@ -162,7 +162,7 @@
         { id:'q3_gender', type:'single', title:'What is your gender?', options:['Male','Female','Non-binary / Other','Prefer not to say'] },
 
         // 4 ZIP (strict 5 digits)
-        { id:'q4_zip', type:'zip5', title:'What is your 5-digit ZIP or postal code?' },
+        { id:'q4_zip', type:'zip5', title:'What is your ZIP or postal code?' },
 
         // 5 Laptop/Computer (UPDATED WORDING/OPTIONS)
         { id:'q5_laptop', type:'single', title:'Which type of computer or laptop do you primarily use?', options:['Windows (PC)','Apple (Mac)','Linux','Other','I do not use a laptop/computer'] },
@@ -278,13 +278,28 @@
                   '<input id="'+q.id+'" class="input" inputmode="numeric" pattern="[0-9]*" placeholder="Enter a whole number (18–99)" value="'+escapeHTML(String(val))+'" />';
         }
 
-        if(q.type==='zip5'){
-          const val = S.answers[q.id] || '';
-          body += '<label for="'+q.id+'" class="sr-only">'+escapeHTML(q.title)+'</label>' +
-                  '<input id="'+q.id+'" class="input" inputmode="numeric" pattern="\\d{5}" maxlength="5" placeholder="12345" value="'+escapeHTML(String(val))+'" />' +
-                  '<p class="hint">Enter exactly 5 digits.</p>';
-        }
-
+        if (q.type === 'zip5') {
+  const val = S.answers[q.id] || '';
+  const errorMsg = "Please enter 5 to 8 letters or numbers (no special characters).";
+  
+  body += `
+    <label for="${q.id}" class="sr-only">${escapeHTML(q.title)}</label>
+    <input 
+      id="${q.id}" 
+      class="input" 
+      type="text"
+      inputmode="text" 
+      pattern="[a-zA-Z0-9]{5,8}" 
+      maxlength="8" 
+      placeholder="12345" 
+      value="${escapeHTML(String(val))}" 
+      oninvalid="this.setCustomValidity('${errorMsg}')"
+      oninput="this.setCustomValidity('')"
+      required
+    />
+    <p class="hint">Enter 5 to 8 alphanumeric characters.</p>
+  `;
+}
         screenEl.innerHTML = body + err;
 
         // Timing + typing capture
