@@ -161,8 +161,8 @@
         // 3 Gender
         { id:'q3_gender', type:'single', title:'What is your gender?', options:['Male','Female','Non-binary / Other','Prefer not to say'] },
 
-        // 4 ZIP (strict 5 digits)
-        { id:'q4_zip', type:'text', title:'What is your ZIP or postal code?' },
+        // 4 ZIP/Postal Code (UPDATED: alphanumeric for UK/CA/IN + US)
+        { id:'q4_zip', type:'postal', title:'What is your ZIP / Postal Code?' },
 
         // 5 Laptop/Computer (UPDATED WORDING/OPTIONS)
         { id:'q5_laptop', type:'single', title:'Which type of computer or laptop do you primarily use?', options:['Windows (PC)','Apple (Mac)','Linux','Other','I do not use a laptop/computer'] },
@@ -278,28 +278,16 @@
                   '<input id="'+q.id+'" class="input" inputmode="numeric" pattern="[0-9]*" placeholder="Enter a whole number (18–99)" value="'+escapeHTML(String(val))+'" />';
         }
 
-        if (q.type === 'text') {
-  const val = S.answers[q.id] || '';
-  const errorMsg = "Please enter 5 to 8 letters or numbers (no special characters).";
-  
-  body += `
-    <label for="${q.id}" class="sr-only">${escapeHTML(q.title)}</label>
-    <input 
-      id="${q.id}" 
-      class="input" 
-      type="text"
-      inputmode="text" 
-      pattern="[a-zA-Z0-9]{5,8}" 
-      maxlength="8" 
-      placeholder="12345" 
-      value="${escapeHTML(String(val))}" 
-      oninvalid="this.setCustomValidity('${errorMsg}')"
-      oninput="this.setCustomValidity('')"
-      required
-    />
-    <p class="hint">Enter 5 to 8 alphanumeric characters.</p>
-  `;
-}
+        // ✅ UPDATED: Postal code input (alphanumeric, spaces & hyphens allowed)
+        if(q.type === 'postal'){
+          const val = S.answers[q.id] || '';
+          body +=
+            '<label for="'+q.id+'" class="sr-only">'+escapeHTML(q.title)+'</label>' +
+            '<input id="'+q.id+'" class="input" type="text" inputmode="text" autocomplete="postal-code" ' +
+            'maxlength="12" placeholder="e.g., SW1A 1AA / M5V 3L9 / 110001" value="'+escapeHTML(String(val))+'" />' +
+            '<p class="hint">Letters/numbers allowed. Spaces and hyphens are okay.</p>';
+        }
+
         screenEl.innerHTML = body + err;
 
         // Timing + typing capture
@@ -324,7 +312,6 @@
                 counter.className = 'char-counter ' + ((q.min && len>=q.min) ? 'valid' : (q.min ? 'error' : ''));
               }
             });
-            // initialize counter
             const initLen = (S.answers[q.id] || '').trim().length;
             if(counter){
               counter.textContent = (q.min ? (initLen+' / '+q.min+' characters') : (initLen+' characters'));
@@ -347,15 +334,12 @@
             S.answers[q.id] = value;
             S.qTimes[q.id] = elapsed;
 
-            // DQ lists
             if(q.dqOn && q.dqOn.includes(value)){
               return exitWithOutcome('dq', q.id+'_disqualifier');
             }
-            // Security gates
             if(q.securityGate && q.correct && value !== q.correct){
               return exitWithOutcome('sec', q.id+'_failed_gate');
             }
-            // Final routing (q15)
             if(q.finalRouting){
               if(value === 'I do not use LinkedIn'){
                 return exitWithOutcome('dq','q15_li_tenure_disqualifier');
@@ -402,12 +386,25 @@
             S.qTimes[q.id] = elapsed;
           }
 
-          if(q.type==='zip5'){
+          // ✅ UPDATED validation + normalization for postal code
+          if(q.type==='postal'){
             const input = document.getElementById(q.id);
-            const val = input ? String(input.value).trim() : '';
-            if(!/^\d{5}$/.test(val)){
-              return showError('Please enter exactly 5 digits.');
+            let val = input ? String(input.value).trim() : '';
+
+            // Normalize: uppercase + collapse spaces
+            val = val.toUpperCase().replace(/\s+/g,' ');
+
+            // Allow only letters/numbers/spaces/hyphens
+            if(!/^[A-Z0-9 -]+$/.test(val)){
+              return showError('Please enter a valid ZIP / Postal Code (letters and numbers only).');
             }
+
+            // Enforce length after removing spaces/hyphens (3–10)
+            const compact = val.replace(/[\s-]/g,'');
+            if(compact.length < 3 || compact.length > 10){
+              return showError('Please enter a valid ZIP / Postal Code.');
+            }
+
             S.answers[q.id] = val;
             S.qTimes[q.id] = elapsed;
           }
@@ -430,7 +427,7 @@
       }
 
       function updateProgress(questionIndex){
-        const totalQs = Q.length - 1; // exclude consent descriptor
+        const totalQs = Q.length - 1;
         const curr = Math.min(questionIndex, totalQs);
         const pct = Math.max(0, Math.min(100, Math.round((curr/totalQs)*100)));
         progressFill.style.width = pct + '%';
@@ -441,7 +438,6 @@
         const el = document.getElementById('err'); if(el){ el.textContent = msg; }
       }
 
-      // ===== OUTCOMES =====
       function completeFlow(){ exitWithOutcome('complete','natural_complete'); }
 
       function exitWithOutcome(type, reason){
@@ -449,22 +445,18 @@
         const endAt = Date.now();
         const payload = buildPayload(endAt);
 
-        // Fan-out (Make first, GAS second)
         ENDPOINTS.forEach(url => sendPayload(url, payload));
 
-        // Redirects
         const status = (type==='complete') ? 1
                      : (type==='dq')       ? 2
                      : (type==='quota')    ? 3
-                     :                       4; // 'sec' or others
+                     :                       4;
         const url = REDIRECT_BASE + '?status=' + status + '&transactionid=' + encodeURIComponent(PID);
 
-        // allow network to flush
         setTimeout(()=>{ location.href = url; }, 700);
         renderDone();
       }
 
-      // ===== PAYLOAD =====
       function buildPayload(endAt){
         const total = Math.round((endAt - S.started_at)/1000);
         const device = {
@@ -502,17 +494,14 @@
         }catch(e){}
       }
 
-      // ===== PERSISTENCE =====
       function saveState(){ try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(S)); }catch(e){} }
       function loadState(){ try{ const raw = localStorage.getItem(STORAGE_KEY); if(!raw) return null; const obj = JSON.parse(raw); obj.resumed = true; return obj; }catch(e){ return null; } }
 
-      // UTIL
       function escapeHTML(s){
         var map = {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'};
         return (s||'').replace(/[&<>\"']/g, function(c){ return map[c]; });
       }
 
-      // INIT
       render();
 
     })();
