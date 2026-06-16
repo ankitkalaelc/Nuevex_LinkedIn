@@ -447,11 +447,18 @@
 
         ENDPOINTS.forEach(url => sendPayload(url, payload));
 
-        const status = (type==='complete') ? 1
-                     : (type==='dq')       ? 2
-                     : (type==='quota')    ? 3
-                     :                       4;
-        const url = REDIRECT_BASE + '?status=' + status + '&transactionid=' + encodeURIComponent(PID);
+
+        let url;
+
+if (type === 'complete') {
+  url = REDIRECT_BASE + '?status=1&prjen=WPWM7DYm&transactionid=' + encodeURIComponent(PID);
+} else if (type === 'dq') {
+  url = REDIRECT_BASE + '?status=2&transactionid=' + encodeURIComponent(PID);
+} else if (type === 'quota') {
+  url = REDIRECT_BASE + '?status=3&transactionid=' + encodeURIComponent(PID);
+} else {
+  url = REDIRECT_BASE + '?status=4&transactionid=' + encodeURIComponent(PID);
+}
 
         setTimeout(()=>{ location.href = url; }, 700);
         renderDone();
