@@ -340,10 +340,7 @@
             if(q.securityGate && q.correct && value !== q.correct){
               return exitWithOutcome('sec', q.id+'_failed_gate');
             }
-            if(q.finalRouting){
-              if(value === 'I do not use LinkedIn'){
-                return exitWithOutcome('dq','q15_li_tenure_disqualifier');
-              } else {
+             else {
                 return exitWithOutcome('complete','q15_li_tenure_complete');
               }
             }
